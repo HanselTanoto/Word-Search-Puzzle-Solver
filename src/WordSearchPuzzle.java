@@ -24,35 +24,56 @@ public class WordSearchPuzzle {
         char[][] puzzle = new char[row][col];
         String[] words = new String[wCount];
         int[][] solved = new int[row][col];
+        long[] solvingTime = new long[wCount];
+        int[] comparison = new int[wCount];
 
         readFile(path, puzzle, words);
         writePuzzle(puzzle);
         writeWords(words);
-        
-        /*
-        System.out.println(row);
-        System.out.println(col);
-        System.out.println(wCount);
-        */
 
         for (int i = 0; i < wCount; i++) {
             int colorId = i%11 + 1;
-            down(puzzle,words[i],solved,colorId);
-            up(puzzle,words[i],solved,colorId);
-            right(puzzle,words[i],solved,colorId);
-            left(puzzle,words[i],solved,colorId);
+            boolean found = false;
+            int[] compareCounter = {0};
+            long startTime = System.nanoTime();    
+            if (!found) {
+                found = down(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = up(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = right(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = left(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = downright(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = upleft(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = upright(puzzle,words[i],solved,colorId,compareCounter);
+            }
+            if (!found) {
+                found = downleft(puzzle,words[i],solved,colorId,compareCounter);
+            }   
+            solvingTime[i] = System.nanoTime() - startTime;
+            comparison[i] = compareCounter[0];
         }
         writeSolved(puzzle, solved);
+        writeStat(words, solvingTime, comparison);
  
-        
         sc.close();
         return;
     }
 
-    // Realisasi Prosedur
     
+    // DIMENSION
     public static int[] dimension (String path) throws Exception {
-        // result[0] = row, result[1] = col, result[2] = wCount
+        // Keterangan: result[0] = row, result[1] = col, result[2] = wCount
         int[] result = new int[3]; 
         int separator = 0;
         Scanner sc = new Scanner(new BufferedReader(new FileReader(path)));
@@ -104,7 +125,6 @@ public class WordSearchPuzzle {
         System.out.println("\nWORD SEARCH PUZZLE");
         for (int i = 0; i < puzzle.length; i++) {
             for (int j = 0; j < puzzle[0].length; j++) {
-                //System.out.println(puzzle[i][j]);
                 System.out.printf("%c ", puzzle[i][j]);
             }
             System.out.printf("\n");
@@ -114,7 +134,6 @@ public class WordSearchPuzzle {
     public static void writeWords (String[] words) {
         System.out.println("\nWord List:");
         for (int i = 0; i < words.length; i++) {
-            //System.out.println(puzzle[i][j]);
             System.out.println(words[i]);
         }
     }
@@ -123,8 +142,6 @@ public class WordSearchPuzzle {
         System.out.println("\nSolved:");
         for (int i = 0; i < puzzle.length; i++) {
             for (int j = 0; j < puzzle[0].length; j++) {
-                //System.out.println(puzzle[i][j]);
-                //System.out.printf(ANSI_COLOR[solved[i][j]]);
                 System.out.printf(ANSI_COLOR[solved[i][j]]);
                 if (solved[i][j] != 0) {
                     System.out.printf(ITALIC);
@@ -137,87 +154,201 @@ public class WordSearchPuzzle {
         }
     }
 
+    public static void writeStat (String[] words, long[] solvingTime, int[] comparison) {
+        System.out.println("\nStatistics:");
+        for (int i = 0; i < words.length; i++) {
+            System.out.println(words[i] + "   -   Time taken: " + solvingTime[i] + " ns, Comparison count: " + comparison[i]);
+        }
+        long totalTime = Arrays.stream(solvingTime).sum();
+        int totalComparison = Arrays.stream(comparison).sum();
+        System.out.println("Total Solving Time = "+ totalTime + " ns");
+        System.out.println("Total Comparison = "+ totalComparison);
+        System.out.println("Average Solving Time = "+ totalTime/words.length + " ns");
+        System.out.println("Average Comparison Count = "+ totalComparison/words.length);
+    }
+
 
     // PROSEDUR STRING MATCHING
-    public static void down (char[][] puzzle, String word, int[][] solved, int colorId) {
+    public static boolean down (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
         int row = puzzle.length;
         int col = puzzle[0].length;
         int wordLen = word.length();
         for (int h = 0; h < col; h++) {
-            for (int i = 0; i < row-wordLen; i++) {
+            for (int i = 0; i <= row-wordLen; i++) {
                 int j = 0;
                 while ((j < wordLen) && (puzzle[i+j][h] == word.charAt(j))) {
                     j++;
+                    count[0]++;
                 }
                 if (j == wordLen) {
                     for (int k = i; k < i+wordLen; k++) {
                         solved[k][h] = colorId;
                     }
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
-    public static void up (char[][] puzzle, String word, int[][] solved, int colorId) {
+    public static boolean up (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
         int row = puzzle.length;
         int col = puzzle[0].length;
         int wordLen = word.length();
         for (int h = 0; h < col; h++) {
-            for (int i = row-1; i >= wordLen; i--) {
+            for (int i = row-1; i >= wordLen-1; i--) {
                 int j = 0;
                 while ((j < wordLen) && (puzzle[i-j][h] == word.charAt(j))) {
                     j++;
+                    count[0]++;
                 }
                 if (j == wordLen) {
                     for (int k = i; k > i-wordLen; k--) {
                         solved[k][h] = colorId;
                     }
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
-    public static void right (char[][] puzzle, String word, int[][] solved, int colorId) {
+    public static boolean right (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
         int row = puzzle.length;
         int col = puzzle[0].length;
         int wordLen = word.length();
         for (int h = 0; h < row; h++) {
-            for (int i = 0; i < col-wordLen; i++) {
+            for (int i = 0; i <= col-wordLen; i++) {
                 int j = 0;
                 while ((j < wordLen) && (puzzle[h][i+j] == word.charAt(j))) {
                     j++;
+                    count[0]++;
                 }
                 if (j == wordLen) {
                     for (int k = i; k < i+wordLen; k++) {
                         solved[h][k] = colorId;
                     }
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
-    public static void left (char[][] puzzle, String word, int[][] solved, int colorId) {
+    public static boolean left (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
         int row = puzzle.length;
         int col = puzzle[0].length;
         int wordLen = word.length();
         
         for (int h = 0; h < row; h++) {
-            for (int i = col-1; i >= wordLen; i--) {
+            for (int i = col-1; i >= wordLen-1; i--) {
                 int j = 0;
                 while ((j < wordLen) && (puzzle[h][i-j] == word.charAt(j))) {
                     j++;
+                    count[0]++;
                 }
                 if (j == wordLen) {
                     for (int k = i; k > i-wordLen; k--) {
                         solved[h][k] = colorId;
                     }
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
+    public static boolean downright (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+        int row = puzzle.length;
+        int col = puzzle[0].length;
+        int wordLen = word.length();
+        
+        for (int h = 0; h <= row-wordLen; h++) {
+            for (int i = 0; i <= col-wordLen; i++) {
+                int j = 0;
+                while ((j < wordLen) && (puzzle[h+j][i+j] == word.charAt(j))) {
+                    j++;
+                    count[0]++;
+                }
+                if (j == wordLen) {
+                    for (int k = i; k < i+wordLen; k++) {
+                        solved[h+k-i][k] = colorId;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean upleft (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+        int row = puzzle.length;
+        int col = puzzle[0].length;
+        int wordLen = word.length();
+        
+        for (int h = row-1; h >= wordLen-1; h--) {
+            for (int i = col-1; i >= wordLen-1; i--) {
+                int j = 0;
+                while ((j < wordLen) && (puzzle[h-j][i-j] == word.charAt(j))) {
+                    j++;
+                    count[0]++;
+                }
+                if (j == wordLen) {
+                    for (int k = i; k > i-wordLen; k--) {
+                        solved[h-k+i][k] = colorId;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean upright (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+        int row = puzzle.length;
+        int col = puzzle[0].length;
+        int wordLen = word.length();
+        
+        for (int h = row-1; h >= wordLen-1; h--) {
+            for (int i = 0; i <= col-wordLen; i++) {
+                int j = 0;
+                while ((j < wordLen) && (puzzle[h-j][i+j] == word.charAt(j))) {
+                    j++;
+                    count[0]++;
+                }
+                if (j == wordLen) {
+                    for (int k = i; k < i+wordLen; k++) {
+                        solved[h-k+i][k] = colorId;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean downleft (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+        int row = puzzle.length;
+        int col = puzzle[0].length;
+        int wordLen = word.length();
+        
+        for (int h = 0; h <= row-wordLen; h++) {
+            for (int i = col-1; i >= wordLen-1; i--) {
+                int j = 0;
+                while ((j < wordLen) && (puzzle[h+j][i-j] == word.charAt(j))) {
+                    j++;
+                    count[0]++;
+                }
+                if (j == wordLen) {
+                    for (int k = i; k < i+wordLen; k++) {
+                        solved[h+k-i][k] = colorId;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    
 }
