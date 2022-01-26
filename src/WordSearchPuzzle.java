@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class WordSearchPuzzle {
 
-    // MAIN PROGRAM
+    // MAIN PROGRAM 
     public static void main (String[] args) throws Exception{
         
         Scanner sc = new Scanner(System.in);
@@ -35,32 +35,36 @@ public class WordSearchPuzzle {
         // Pemecahan puzzle (string matching)
         for (int i = 0; i < wCount; i++) {
             int colorId = i%11 + 1;
-            boolean found = false;
             int[] compareCounter = {0};
-            long startTime = System.nanoTime();    
-            if (!found) {
-                found = down(puzzle,words[i],solved,colorId,compareCounter);
-            }
-            if (!found) {
-                found = right(puzzle,words[i],solved,colorId,compareCounter);
-            }
-            if (!found) {
-                found = up(puzzle,words[i],solved,colorId,compareCounter);
-            }
-            if (!found) {
-                found = left(puzzle,words[i],solved,colorId,compareCounter);
-            }
-            if (!found) {
-                found = downright(puzzle,words[i],solved,colorId,compareCounter);
-            }
-            if (!found) {
-                found = downleft(puzzle,words[i],solved,colorId,compareCounter);
-            }   
-            if (!found) {
-                found = upleft(puzzle,words[i],solved,colorId,compareCounter);
-            }
-            if (!found) {
-                found = upright(puzzle,words[i],solved,colorId,compareCounter);
+            long startTime = System.nanoTime();
+            letterTransversal:
+            for (int j = 0; j < row; j++) {
+                for (int k = 0; k < col; k++) {
+                    if (down(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                    else if (right(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                    else if (up(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                    else if (left(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                    else if (downright(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                    else if (downleft(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }   
+                    else if (upleft(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                    else if (upright(puzzle,words[i],j,k,solved,colorId,compareCounter)) {
+                        break letterTransversal;
+                    }
+                }
             }
             solvingTime[i] = System.nanoTime() - startTime;
             comparison[i] = compareCounter[0];
@@ -186,198 +190,161 @@ public class WordSearchPuzzle {
 
 
     // PROSEDUR STRING MATCHING
-    public static boolean down (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean down (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya vertikal ke bawah
-        int row = puzzle.length;
-        int col = puzzle[0].length;
         int wordLen = word.length();
-        for (int h = 0; h < col; h++) {
-            for (int i = 0; i <= row-wordLen; i++) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[i+j][h] == word.charAt(j))) {
-                    j++;
+        if (puzzle.length-x >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x+j][y] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = x; k < x+wordLen; k++) {
+                    solved[k][y] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k < i+wordLen; k++) {
-                        solved[k][h] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean up (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean up (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya vertikal ke atas
-        int row = puzzle.length;
-        int col = puzzle[0].length;
         int wordLen = word.length();
-        for (int h = 0; h < col; h++) {
-            for (int i = row-1; i >= wordLen-1; i--) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[i-j][h] == word.charAt(j))) {
-                    j++;
+        if (x+1 >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x-j][y] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = x; k > x-wordLen; k--) {
+                    solved[k][y] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k > i-wordLen; k--) {
-                        solved[k][h] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean right (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean right (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya horizontal ke kanan
-        int row = puzzle.length;
-        int col = puzzle[0].length;
         int wordLen = word.length();
-        for (int h = 0; h < row; h++) {
-            for (int i = 0; i <= col-wordLen; i++) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[h][i+j] == word.charAt(j))) {
-                    j++;
+        if (puzzle[0].length-y >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x][y+j] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = y; k < y+wordLen; k++) {
+                    solved[x][k] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k < i+wordLen; k++) {
-                        solved[h][k] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean left (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean left (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya horizontal ke kiri
-        int row = puzzle.length;
-        int col = puzzle[0].length;
         int wordLen = word.length();
-        
-        for (int h = 0; h < row; h++) {
-            for (int i = col-1; i >= wordLen-1; i--) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[h][i-j] == word.charAt(j))) {
-                    j++;
+        if (y+1 >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x][y-j] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = y; k > y-wordLen; k--) {
+                    solved[x][k] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k > i-wordLen; k--) {
-                        solved[h][k] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean downright (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean downright (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya diagonal ke bawah kanan
-        int row = puzzle.length;
-        int col = puzzle[0].length;
-        int wordLen = word.length();
-        
-        for (int h = 0; h <= row-wordLen; h++) {
-            for (int i = 0; i <= col-wordLen; i++) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[h+j][i+j] == word.charAt(j))) {
-                    j++;
+        int wordLen = word.length();        
+        if (Math.min(puzzle.length-x,puzzle[0].length-y) >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x+j][y+j] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = y; k < y+wordLen; k++) {
+                    solved[x+k-y][k] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k < i+wordLen; k++) {
-                        solved[h+k-i][k] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean upleft (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean upleft (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya diagonal ke kiri atas
-        int row = puzzle.length;
-        int col = puzzle[0].length;
-        int wordLen = word.length();
-        
-        for (int h = row-1; h >= wordLen-1; h--) {
-            for (int i = col-1; i >= wordLen-1; i--) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[h-j][i-j] == word.charAt(j))) {
-                    j++;
+        int wordLen = word.length();        
+        if (Math.min(x+1,y+1) >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x-j][y-j] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = y; k > y-wordLen; k--) {
+                    solved[x+k-y][k] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k > i-wordLen; k--) {
-                        solved[h+k-i][k] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean upright (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean upright (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya diagonal ke kanan atas
-        int row = puzzle.length;
-        int col = puzzle[0].length;
-        int wordLen = word.length();
-        
-        for (int h = row-1; h >= wordLen-1; h--) {
-            for (int i = 0; i <= col-wordLen; i++) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[h-j][i+j] == word.charAt(j))) {
-                    j++;
+        int wordLen = word.length();        
+        if (Math.min(x+1,puzzle[0].length-y) >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x-j][y+j] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = y; k < y+wordLen; k++) {
+                    solved[x-k+y][k] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k < i+wordLen; k++) {
-                        solved[h-k+i][k] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
     }
 
-    public static boolean downleft (char[][] puzzle, String word, int[][] solved, int colorId, int[] count) {
+    public static boolean downleft (char[][] puzzle, String word, int x, int y, int[][] solved, int colorId, int[] count) {
         // Mencari kata yang arahnya diagonal ke kiri bawah
-        int row = puzzle.length;
-        int col = puzzle[0].length;
-        int wordLen = word.length();
-        
-        for (int h = 0; h <= row-wordLen; h++) {
-            for (int i = col-1; i >= wordLen-1; i--) {
-                int j = 0;
-                count[0]++;
-                while ((j < wordLen) && (puzzle[h+j][i-j] == word.charAt(j))) {
-                    j++;
+        int wordLen = word.length();        
+        if (Math.min(puzzle.length-x,y+1) >= wordLen) {
+            int j = 0;
+            count[0]++;
+            while ((j < wordLen) && (puzzle[x+j][y-j] == word.charAt(j))) {
+                j++;
+            }
+            count[0] += j;
+            if (j == wordLen) {
+                for (int k = y; k > y-wordLen; k--) {
+                    solved[x-k+y][k] = colorId;
                 }
-                count[0] += j;
-                if (j == wordLen) {
-                    for (int k = i; k > i-wordLen; k--) {
-                        solved[h-k+i][k] = colorId;
-                    }
-                    return true;
-                }
+                return true;
             }
         }
         return false;
